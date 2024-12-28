@@ -1,6 +1,6 @@
-import { getLanguageModel } from "src/component/lib/ai-model";
 import { streamText } from "ai";
-import type { APIRoute } from "astro";
+import { getLanguageModel } from "../../../lib/ai-model";
+
 const SYSTEM_PROMPT = `
 You are an IELTS examiner, and your task is to evaluate the user's response based on the provided original sentence. The response can be a sentence or a paragraph. Your goal is to determine whether the user's response is grammatically correct and accurately conveys the meaning of the original sentence.
 
@@ -38,8 +38,8 @@ Error codes:
 - **punctuation_error**: Incorrect punctuation.
 
 Example of correct output:
-Original Sentence: "Online learning has transformed the educational landscape."
-User's Response: "Học trực tuyến đã làm thay đổi bối cảnh giáo dục."
+"Online learning has transformed the educational landscape."
+=> "Học trực tuyến đã làm thay đổi bối cảnh giáo dục."
 
 Output:
 {
@@ -50,8 +50,8 @@ Output:
 }
 
 Example of incorrect output:
-Original Sentence: "Online learning has transformed the educational landscape."
-User's Response: "Học trực tuyến sẽ thay đổi cục diện giáo dục."
+ "Online learning has transformed the educational landscape."
+=> "Học trực tuyến sẽ thay đổi cục diện giáo dục."
 
 Output:
 {
@@ -59,34 +59,35 @@ Output:
   "score": 5,
   "feedback": "Phản hồi của bạn không chính xác. Bạn đã sử dụng thì tương lai (will), nhưng câu gốc sử dụng thì hiện tại hoàn thành (has transformed).",
   "issues": [
-    {
-      "type": "tense_error",
-      "description": "Câu người dùng sử dụng thì tương lai 'will', nhưng câu gốc sử dụng thì hiện tại hoàn thành 'has transformed'. Điều này làm thay đổi ý nghĩa của câu, vì thì hiện tại hoàn thành nhấn mạnh hành động đã hoàn tất và có tác động lâu dài."
-    },
-    {
-      "type": "meaning_error",
-      "description": "Sử dụng 'will' thay vì 'has' làm sai lệch ý nghĩa của câu. Câu gốc nói về sự thay đổi đã xảy ra, không phải một hành động trong tương lai."
-    }
+    {   "type": "tense_error",  "description": "Câu người dùng sử dụng thì tương lai 'will', nhưng câu gốc sử dụng thì hiện tại hoàn thành 'has transformed'. Điều này làm thay đổi ý nghĩa của câu, vì thì hiện tại hoàn thành nhấn mạnh hành động đã hoàn tất và có tác động lâu dài."},
+    {  "type": "meaning_error", "description": "Sử dụng 'will' thay vì 'has' làm sai lệch ý nghĩa của câu. Câu gốc nói về sự thay đổi đã xảy ra, không phải một hành động trong tương lai." }
   ]
 }
 `;
- const USER_PROMPT = `
+const USER_PROMPT = `"
+{{ORIGINAL_CONTENT}}
+=> {{USER_RESPONSE}}
 `;
 
-export const POST: APIRoute = async ({request, clientAddress}) => {
+export async function POST(
+  req: Request,
+) {
+  const { prompt, context }: { prompt: string; context: string } =
+    await req.json();
+
+
+  const userPrompt = USER_PROMPT.replace("{{ORIGINAL_CONTENT}}", context).replace(
+    "{{USER_RESPONSE}}",
+    prompt
+  );
 
     const result = await streamText({
-        model: getLanguageModel(),
-        messages: [
-            {
-                role: "system",
-                content: SYSTEM_PROMPT,
-            },
-            {
-                role: "user",
-                content: USER_PROMPT
-            }
-        ]
+      model: getLanguageModel(),
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: userPrompt }
+      ]
     });
+  
     return result.toDataStreamResponse();
 }

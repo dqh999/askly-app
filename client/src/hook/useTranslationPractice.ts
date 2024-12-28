@@ -1,115 +1,152 @@
 import { useState, useCallback, useEffect } from 'react';
-import { ieltsTopics, ieltsSentences, ieltsBands, translationTypes } from '../utils/ieltsData';
+import { ieltsTopics, ieltsBands, contentTypes } from '../utils/ieltsData';
+import { useCompletion } from 'ai/react';
+import { Content, ContentType } from '../type/contentType';
+import { Issue, ResponseData } from '../type/resultType';
+
+const defaultContent: Content = {
+  topic: ["Environment"],
+  english: "Climate change is one of the most pressing issues of our time.",
+  vietnamese: "Biến đổi khí hậu là một trong những vấn đề cấp bách nhất của thời đại chúng ta.",
+  band: 6,
+  type: "s",
+}
 
 export const useTranslationPractice = () => {
-  const [selectedTopic, setSelectedTopic] = useState<keyof typeof ieltsSentences>(ieltsTopics[0]);
+  const [selectedTopic, setSelectedTopic] = useState<string>(ieltsTopics[0]);
   const [selectedBand, setSelectedBand] = useState(ieltsBands[0]);
-  const [selectedType, setSelectedType] = useState(translationTypes[0]);
+  const [selectedType, setSelectedType] = useState<ContentType>(contentTypes[0]);
 
-  const [currentSentenceIndex, setCurrentSentenceIndex] = useState(0);
+  const [currentContent, setCurrentContent] = useState<Content>(defaultContent);
+  const [currentPage, setCurrentPage] = useState(1);
   const [isEnglishToVietnamese, setIsEnglishToVietnamese] = useState(true);
-  const [userTranslation, setUserTranslation] = useState('');
+
+  const [isCheckAnswer, setIsCheckAnswer] = useState(false);
+
   const [showAnswer, setShowAnswer] = useState(false);
   const [feedback, setFeedback] = useState('');
-  const [errors, setErrors] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [issues, setIssues] = useState<Issue[]>([]);
+  const [isNextLoading, setIsNextLoading] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
 
-  const currentSentence = ieltsSentences[selectedTopic][currentSentenceIndex];
+  const {
+    completion,
+    input: userAnswer,
+    setInput: setUserAnswer,
+    handleInputChange: handleUserAnswerChange,
+    handleSubmit,
+    isLoading: isCheckAnswerLoading,
+    error,
+  } = useCompletion({
+    api: "/api/checkAnswer",
+    body: {
+      context: isEnglishToVietnamese ? currentContent?.english : currentContent?.vietnamese,
+    },
+  });
 
-  const handleTopicChange = useCallback((topic: keyof typeof ieltsSentences) => {
+  const handleTopicChange = useCallback((topic: string) => {
     setSelectedTopic(topic);
-    setCurrentSentenceIndex(0);
-    setUserTranslation('');
-    setShowAnswer(false);
-    setFeedback('');
-    setIsCorrect(false);
+    resetState();
   }, []);
 
   const handleBandChange = useCallback((band: number) => {
     setSelectedBand(band);
-    setCurrentSentenceIndex(0);
     resetState();
   }, []);
-  const handleTypeChange = useCallback((type: string) => {
+  const handleTypeChange = useCallback((type: ContentType) => {
     setSelectedType(type);
-    setCurrentSentenceIndex(0);
     resetState();
   }, []);
   const resetState = () => {
-    setUserTranslation('');
+    setUserAnswer('');
+    setCurrentPage(1);
+    setIsCheckAnswer(false);
     setShowAnswer(false);
     setFeedback('');
-    setErrors([]);
+    setIssues([]);
     setIsCorrect(false);
   };
-  const handleNextSentence = useCallback(() => {
-    setIsLoading(true);
-    setTimeout(() => {
-      const nextIndex = (currentSentenceIndex + 1) % ieltsSentences[selectedTopic].length;
-      setCurrentSentenceIndex(nextIndex);
-      setUserTranslation('');
-      setShowAnswer(false);
-      setFeedback('');
-      setIsCorrect(false);
-      setIsLoading(false);
-    }, 1000);
-  }, [currentSentenceIndex, selectedTopic]);
+
+  const fetchContent = async (topic: string, bandScore: string, type: string, page: string) => {
+    const url = new URL("/api/getContent", window.location.origin);
+    const params = new URLSearchParams();
+
+    if (topic) params.set("topic", topic);
+    if (bandScore) params.set("bandScore", bandScore);
+    if (type) params.set("type", type);
+    if (page) params.set("page", page);
+    params.set("pageSize", "1");
+
+    url.search = params.toString();
+    const res = await fetch(url);
+
+    const data = await res.json();
+
+    return data;
+  };
+
+  const handleNextSentence = useCallback(async () => {
+    setIsNextLoading(true);
+    resetState();
+    const content = await fetchContent(
+      selectedTopic,
+      selectedBand.toString(),
+      selectedType.type,
+      currentPage.toString(),
+    );
+    console.log(content);
+    setCurrentContent(content);
+    setIsNextLoading(false);
+  }, [currentPage, selectedTopic]);
 
   const toggleTranslationDirection = useCallback(() => {
     setIsEnglishToVietnamese(!isEnglishToVietnamese);
-    setUserTranslation('');
+    setUserAnswer('');
     setShowAnswer(false);
     setFeedback('');
     setIsCorrect(false);
   }, [isEnglishToVietnamese]);
 
-  const checkAnswer = useCallback(() => {
-    setShowAnswer(true);
-    const correctAnswer = isEnglishToVietnamese ? currentSentence.vietnamese : currentSentence.english;
+  const handleCheckAnswer = useCallback(() => {
+    setIsCheckAnswer(true);
+    handleSubmit();
+  }, [currentContent, isEnglishToVietnamese, userAnswer]);
 
-    if (userTranslation.toLowerCase().trim() === correctAnswer.toLowerCase().trim()) {
-      setFeedback("Correct! Here's a suggestion to make it even better: Consider using more advanced vocabulary or structures.");
-      setIsCorrect(true);
-    } else {
-      const errors = [];
-      if (userTranslation.length < correctAnswer.length * 0.5) {
-        errors.push("Your translation is too short. Try to include more details from the original sentence.");
-      }
-      if (userTranslation.length > correctAnswer.length * 1.5) {
-        errors.push("Your translation is too long. Try to be more concise while maintaining the original meaning.");
-      }
-      if (!userTranslation.includes(isEnglishToVietnamese ? "là" : "is") && correctAnswer.includes(isEnglishToVietnamese ? "là" : "is")) {
-        errors.push("You missed translating a key verb. Make sure to include all important parts of speech.");
-      }
-      if (errors.length === 0) {
-        errors.push("Your translation has some inaccuracies. Pay attention to word choice and sentence structure.");
-      }
-      setErrors(errors);
-      setFeedback(`Here are some areas for improvement:\n${errors.join('\n')}`);
-      setIsCorrect(false);
+  useEffect(() => {
+    if (!isCheckAnswerLoading && isCheckAnswer) {
+      const cleanData = completion.replace(/```json\s*|\s*```/g, '');
+      const parsedData: ResponseData = JSON.parse(cleanData);
+      console.log(parsedData);
+      if (parsedData.is_correct) {
+        setIsCorrect(true);
+        setFeedback(parsedData.feedback)
+      } else {
+        setIsCorrect(false);
+        setIssues(parsedData.issues);
+      };
+      setShowAnswer(true);
     }
-  }, [currentSentence, isEnglishToVietnamese, userTranslation]);
+  }, [isCheckAnswerLoading])
 
   return {
     selectedTopic,
     selectedBand,
     selectedType,
-    currentSentence,
+    currentContent,
     isEnglishToVietnamese,
-    userTranslation,
+    userAnswer,
     showAnswer,
     feedback,
-    errors,
-    isLoading,
+    issues,
+    isNextLoading,
     isCorrect,
     handleTopicChange,
     handleBandChange,
     handleTypeChange,
     handleNextSentence,
     toggleTranslationDirection,
-    setUserTranslation,
-    checkAnswer,
+    handleUserAnswerChange,
+    handleCheckAnswer,
+    isCheckAnswerLoading
   };
 };
-

@@ -5,6 +5,7 @@ type ModelType = "openai" | "anthropic" | "google";
 
 export const getLanguageModel = (): LanguageModelV1 => {
     const googleApiKey = process.env.GOOGLE_API_KEY;
+    console.log(googleApiKey);
 
     if (googleApiKey) {
         const gemini = createGoogleGenerativeAI({

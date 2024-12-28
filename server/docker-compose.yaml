@@ -1,0 +1,17 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: db-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: Hop2005@
+      MYSQL_DATABASE: swm_db
+      MYSQL_USER: swm_admin
+      MYSQL_PASSWORD: Hop2005@
+    ports:
+      - "3308:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql  # Correctly define the volume
+
+volumes:
+  mysql_data: {}  # Define volume
