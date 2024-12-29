@@ -102,7 +102,6 @@ export const useTranslationPractice = () => {
 
   };
   useEffect(() => {
-    console.log("goi ne");
     const fetchNewContent = async () => {
 
       const content = await fetchContent(
@@ -131,6 +130,7 @@ export const useTranslationPractice = () => {
   }, [selectedTopic, selectedBand, selectedType, currentPage]);
 
   const handleNextSentence = useCallback(async () => {
+    setShowAnswer(false);
     setIsNextLoading(true);
     setCurrentPage(prev => prev + 1);
     setIsNextLoading(false);
@@ -152,11 +152,8 @@ export const useTranslationPractice = () => {
 
   useEffect(() => {
     if (!isCheckAnswerLoading && isCheckAnswer) {
-      console.log("completion");
-      console.log(completion)
       const cleanData = completion.replace(/```json\s*|\s*```/g, '');
       const parsedData: ResponseData = JSON.parse(cleanData);
-      console.log(parsedData);
       if (parsedData.is_correct) {
         setIsCorrect(true);
         setBand(parsedData.score);
