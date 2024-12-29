@@ -2,7 +2,7 @@ import { Content } from "../type/contentType";
 import { Issue } from "../type/resultType";
 type ResultFeedbackProps = {
     isCorrect: boolean;
-    bandScore: Number;
+    bandScore: number;
     feedback: string;
     issues: Issue[];
     currentContent: Content;
@@ -21,7 +21,7 @@ const ResultFeedback = ({
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Result:</h3>
             {isCorrect ? (
                 <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4">
-                    <p className="font-bold">Correct! (IELTS Band 5)</p>
+                    <p className="font-bold">Correct! (IELTS Band {bandScore.toString()})</p>
                     <p className="text-gray-700 whitespace-pre-line">{feedback}</p>
                 </div>
             ) : (

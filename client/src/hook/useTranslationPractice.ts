@@ -37,7 +37,7 @@ export const useTranslationPractice = () => {
   const [isCheckAnswer, setIsCheckAnswer] = useState(false);
 
   const [showAnswer, setShowAnswer] = useState(false);
-  const [band, setBand] = useState<Number>(5);
+  const [band, setBand] = useState<number>(5);
   const [feedback, setFeedback] = useState('');
   const [issues, setIssues] = useState<Issue[]>([]);
   const [isNextLoading, setIsNextLoading] = useState(false);
@@ -94,18 +94,12 @@ export const useTranslationPractice = () => {
     params.set("pageSize", "1");
 
     url.search = params.toString();
-    try {
-      const res = await fetch(url);
-      
-      if (!res.ok){
-        throw new Error(`HTTP error! status: ${res.status}`);
-      }
+    const res = await fetch(url);
 
-      const data = await res.json();
-      return data[0];
+    const data = await res.json();
+    return data[0];
 
-    } catch (err) {
-    }
+
   };
   useEffect(() => {
     console.log("goi ne");
@@ -132,7 +126,7 @@ export const useTranslationPractice = () => {
         setCurrentContent(content);
       }
     };
-  
+
     fetchNewContent();
   }, [selectedTopic, selectedBand, selectedType, currentPage]);
 
