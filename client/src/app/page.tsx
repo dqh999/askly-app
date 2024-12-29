@@ -90,16 +90,18 @@ export default function TranslationPractice() {
             <h2 className="text-lg font-semibold text-gray-900 mb-2">
               Translate the following sentence:
             </h2>
-            <div className='flex flex-row justify-between items-center r mb-4 space-x-1'>
+            <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center items-start mb-4 space-x-1'>
               <p className="text-gray-700">
                 {isEnglishToVietnamese ? currentContent?.english : currentContent?.vietnamese}
               </p>
-              <button className="text-gray-500 border p-2 rounded-full"
-                onClick={playContentToSpeech}>
-                <i className='text-gray-600'>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" /><path d="M16 9a5 5 0 0 1 0 6" /><path d="M19.364 18.364a9 9 0 0 0 0-12.728" /></svg>
-                </i>
-              </button>
+              {isEnglishToVietnamese && (
+                <button className="text-gray-500 border p-1 rounded-full"
+                  onClick={playContentToSpeech}>
+                  <i className='text-gray-600 '>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z" /><path d="M16 9a5 5 0 0 1 0 6" /><path d="M19.364 18.364a9 9 0 0 0 0-12.728" /></svg>
+                  </i>
+                </button>
+              )}
             </div>
             <div className='relative'>
               <textarea
@@ -109,22 +111,24 @@ export default function TranslationPractice() {
                 rows={4}
                 placeholder="Enter your translation here"
               />
-              <button
-                onClick={handleSpeedToText}
-                className="absolute bottom-5 right-2">
-                {!isSpeaking ?
-                  <i className='text-gray-600'>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" x2="12" y1="19" y2="22" /></svg>
-                  </i> :
-                  <i className="text-red-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
-                      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-                      <line x1="12" x2="12" y1="19" y2="22" />
-                    </svg>
-                  </i>
-                }
-              </button>
+              {!isEnglishToVietnamese && (
+                <button
+                  onClick={handleSpeedToText}
+                  className="absolute bottom-5 right-2">
+                  {!isSpeaking ?
+                    <i className='text-gray-600'>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" x2="12" y1="19" y2="22" /></svg>
+                    </i> :
+                    <i className="text-red-500">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+                        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                        <line x1="12" x2="12" y1="19" y2="22" />
+                      </svg>
+                    </i>
+                  }
+                </button>
+              )}
             </div>
           </div>
           {emptyAnswerError && (

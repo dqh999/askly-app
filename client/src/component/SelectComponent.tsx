@@ -19,7 +19,7 @@ const SelectComponent = ({
                 id="topic"
                 value={input}
                 onChange={(e) => { handleInputChange(e) }}
-                className="w-full p-2 text-gray-700 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
+                className="w-full p-2 text-gray-700 border border-gray-300 rounded-md shadow-sm"
             >
                 {options.map((option, index) => (
                     <option key={index} value={option}>
