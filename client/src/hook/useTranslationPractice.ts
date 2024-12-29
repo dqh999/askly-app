@@ -21,7 +21,7 @@ export const useTranslationPractice = () => {
 
   const [currentContent, setCurrentContent] = useState<Content>(defaultContent);
 
-  const { speak }: { speak: (text: string, lang: string) => void } = useTextToSpeed();
+  const { speak } = useTextToSpeed();
 
   const {
     setLanguage,
@@ -172,7 +172,9 @@ export const useTranslationPractice = () => {
   const playContentToSpeech = () => {
     // const lang = !isEnglishToVietnamese ? 'vi-VN' : 'en-US';
     const content = isEnglishToVietnamese ? currentContent.english : currentContent.vietnamese;
-    speak(content, 'en-US' );
+    speak("en-US", content,()=>{
+      console.log('Speech finished');
+    } );
   }
   const convertSpeedToText = () => {
     // const lang = !isEnglishToVietnamese ? 'vi-VN' : 'en-US';

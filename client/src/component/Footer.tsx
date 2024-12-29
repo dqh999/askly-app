@@ -19,7 +19,7 @@ export function Footer() {
           <div className="w-full md:w-1/3">
             <h4 className="text-lg font-semibold mb-2">Connect With Us</h4>
             <p className="text-gray-600 mb-2">Stay updated with our latest news and offers.</p>
-            <form className="flex">
+            <form className="flex border-[0.5px] border-primary-500 rounded-md">
               <input 
                 type="email" 
                 placeholder="Enter your email" 
@@ -27,7 +27,7 @@ export function Footer() {
               />
               <button 
                 type="submit" 
-                className="bg-black text-white hover:bg-gray-700 px-4 py-2 rounded-r-md transition duration-300"
+                className="bg-primary text-white hover:bg-gray-700 px-4 py-2 rounded-r-md transition duration-300"
               >
                 Subscribe
               </button>
