@@ -2,6 +2,7 @@ import { Content } from "../type/contentType";
 import { Issue } from "../type/resultType";
 type ResultFeedbackProps = {
     isCorrect: boolean;
+    bandScore: Number;
     feedback: string;
     issues: Issue[];
     currentContent: Content;
@@ -9,6 +10,7 @@ type ResultFeedbackProps = {
 };
 const ResultFeedback = ({
     isCorrect,
+    bandScore,
     feedback,
     issues,
     currentContent,

@@ -4,15 +4,16 @@ interface ButtonProps {
     className?: string;  
     children: React.ReactNode;
     isLoading?: boolean;
-    onClick?: () => void; 
+    onClick?: () => void;
+    disabled?: boolean; 
 }
 
-const Button: React.FC<ButtonProps> = ({ className = '', children, isLoading, onClick, ...props }) => {
+const Button: React.FC<ButtonProps> = ({ className = '', children, isLoading, onClick, disabled}) => {
     return (
         <button
             onClick={onClick}
             className={` ${className}`} 
-            {...props} 
+            disabled={disabled}
         >
             {isLoading ? (
                 <span className="flex items-center justify-center">

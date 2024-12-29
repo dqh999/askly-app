@@ -1,5 +1,5 @@
 'use client'
-
+import 'regenerator-runtime/runtime';
 import Button from '@component/Button';
 import ResultFeedback from '@component/ResultFeedback';
 import SelectComponent from '@component/SelectComponent';
@@ -20,6 +20,7 @@ export default function TranslationPractice() {
     isEnglishToVietnamese,
     userAnswer,
     showAnswer,
+    band: bandScore,
     feedback,
     issues,
     isNextLoading,
@@ -28,6 +29,7 @@ export default function TranslationPractice() {
     handleBandChange,
     handleTypeChange,
     handleNextSentence,
+    isContentNotFound,
     toggleTranslationDirection,
     handleUserAnswerChange,
     handleCheckAnswer,
@@ -38,6 +40,7 @@ export default function TranslationPractice() {
     stopSpeaking
   } = useTranslationPractice();
   const [isSpeaking, setSpeaking] = useState(false);
+  const [emptyAnswerError, setEmptyAnswerError] = useState<boolean>(false);
 
   useEffect(() => {
     if (isSpeaking && !isSpeakingFinished) {
@@ -87,7 +90,7 @@ export default function TranslationPractice() {
             <h2 className="text-lg font-semibold text-gray-900 mb-2">
               Translate the following sentence:
             </h2>
-            <div className='flex flex-row justify-between items-center r mb-4'>
+            <div className='flex flex-row justify-between items-center r mb-4 space-x-1'>
               <p className="text-gray-700">
                 {isEnglishToVietnamese ? currentContent?.english : currentContent?.vietnamese}
               </p>
@@ -114,7 +117,6 @@ export default function TranslationPractice() {
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" x2="12" y1="19" y2="22" /></svg>
                   </i> :
                   <i className="text-red-500">
-                    {/* Here, you can place an icon for a speaking state or leave it empty */}
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
                       <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
@@ -125,24 +127,46 @@ export default function TranslationPractice() {
               </button>
             </div>
           </div>
-          <div className="flex sm:flex-row flex-col justify-between mb-6">
+          {emptyAnswerError && (
+            <div className="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700">
+              <div className="flex">
+                <p>Please enter your translation before checking the answer.</p>
+              </div>
+            </div>
+          )}
+          {isContentNotFound && (
+            <div className="mb-4 p-4 bg-red-100 border-l-4 border-red-500 text-red-700">
+              <div className="flex">
+                <p>No more content available. Please try again later.</p>
+              </div>
+            </div>
+          )}
+          <div className="flex sm:flex-row flex-col justify-between mb-6 space-y-5 sm:space-y-0">
             <Button
-              onClick={handleCheckAnswer}
+              onClick={() => {
+                if (!userAnswer.trim()) {
+                  setEmptyAnswerError(true);
+                  return;
+                }
+                setEmptyAnswerError(false);
+                handleCheckAnswer();
+              }}
               isLoading={isCheckAnswerLoading}
-              className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md  focus:outline-none focus:ring-2 focus:ring-offset-2 "
-              >
-                CheckAnswer
-              </Button>
+              className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md  focus:outline-none "
+            >
+              CheckAnswer
+            </Button>
             <Button
               onClick={toggleTranslationDirection}
-              className='bg-background hover:bg-background/90 text-primary px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-back'
-              >
-                {`Switch to ${isEnglishToVietnamese ? 'Vietnamese → English' : 'English → Vietnamese'}`}
-              </Button>
+              className='bg-background hover:bg-background/90 border-[0.5px] border-primary text-primary px-4 py-2 rounded-md focus:outline-none'
+            >
+              {`Switch to ${isEnglishToVietnamese ? 'Vietnamese → English' : 'English → Vietnamese'}`}
+            </Button>
           </div>
           {showAnswer && (
             <ResultFeedback
               isCorrect={isCorrect}
+              bandScore={bandScore}
               feedback={feedback}
               issues={issues}
               currentContent={currentContent}
@@ -153,9 +177,9 @@ export default function TranslationPractice() {
             onClick={handleNextSentence}
             isLoading={isNextLoading}
             className={`bg-primary hover:bg-primary/90 w-full text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black`}
-            >
-              Next Sentence
-            </Button>
+          >
+            Next Sentence
+          </Button>
         </div>
       </div>
       <Footer />

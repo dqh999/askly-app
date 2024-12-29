@@ -23,7 +23,7 @@ export const useTranslationPractice = () => {
 
   const { speak }: { speak: (text: string, lang?: string) => void } = useTextToSpeed();
 
-  const { 
+  const {
     setLanguage,
     transcript,
     listening: isSpeakingFinished,
@@ -37,10 +37,13 @@ export const useTranslationPractice = () => {
   const [isCheckAnswer, setIsCheckAnswer] = useState(false);
 
   const [showAnswer, setShowAnswer] = useState(false);
+  const [band, setBand] = useState<Number>(5);
   const [feedback, setFeedback] = useState('');
   const [issues, setIssues] = useState<Issue[]>([]);
   const [isNextLoading, setIsNextLoading] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [isContentNotFound, setIsContentNotFound] = useState(false);
+
 
   const {
     completion,
@@ -76,12 +79,10 @@ export const useTranslationPractice = () => {
     resetState();
   }, [resetState]);
   const handleTypeChange = useCallback((value: string) => {
-    const type = contentTypes.find((t) => t.description = value) as ContentType;
+    const type = contentTypes.find((t) => t.description === value) as ContentType;
     setSelectedType(type);
     resetState();
   }, [resetState]);
-
-
   const fetchContent = async (topic: string, bandScore: string, type: string, page: string) => {
     const url = new URL("/api/getContent", window.location.origin);
     const params = new URLSearchParams();
@@ -93,24 +94,51 @@ export const useTranslationPractice = () => {
     params.set("pageSize", "1");
 
     url.search = params.toString();
-    const res = await fetch(url);
+    try {
+      const res = await fetch(url);
+      
+      if (!res.ok){
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
 
-    const data = await res.json();
+      const data = await res.json();
+      return data[0];
 
-    return data;
+    } catch (err) {
+    }
   };
+  useEffect(() => {
+    console.log("goi ne");
+    const fetchNewContent = async () => {
+
+      const content = await fetchContent(
+        selectedTopic,
+        selectedBand.toString(),
+        selectedType.type,
+        currentPage.toString(),
+      );
+
+      if (!content) {
+        setIsContentNotFound(true);
+        setCurrentContent({
+          topic: ["Environment"],
+          english: "",
+          vietnamese: "",
+          band: 6,
+          type: "s",
+        });
+      } else {
+        setIsContentNotFound(false);
+        setCurrentContent(content);
+      }
+    };
+  
+    fetchNewContent();
+  }, [selectedTopic, selectedBand, selectedType, currentPage]);
 
   const handleNextSentence = useCallback(async () => {
     setIsNextLoading(true);
-    resetState();
-    const content = await fetchContent(
-      selectedTopic,
-      selectedBand.toString(),
-      selectedType.type,
-      currentPage.toString(),
-    );
-    console.log(content);
-    setCurrentContent(content);
+    setCurrentPage(prev => prev + 1);
     setIsNextLoading(false);
   }, [currentPage, selectedTopic]);
 
@@ -123,6 +151,7 @@ export const useTranslationPractice = () => {
   }, [isEnglishToVietnamese]);
 
   const handleCheckAnswer = useCallback(() => {
+
     setIsCheckAnswer(true);
     handleSubmit();
   }, [currentContent, isEnglishToVietnamese, userAnswer]);
@@ -134,6 +163,7 @@ export const useTranslationPractice = () => {
       console.log(parsedData);
       if (parsedData.is_correct) {
         setIsCorrect(true);
+        setBand(parsedData.score);
         setFeedback(parsedData.feedback)
       } else {
         setIsCorrect(false);
@@ -162,6 +192,7 @@ export const useTranslationPractice = () => {
     isEnglishToVietnamese,
     userAnswer,
     showAnswer,
+    band,
     feedback,
     issues,
     isNextLoading,
@@ -170,6 +201,7 @@ export const useTranslationPractice = () => {
     handleBandChange,
     handleTypeChange,
     handleNextSentence,
+    isContentNotFound,
     toggleTranslationDirection,
     handleUserAnswerChange,
     handleCheckAnswer,

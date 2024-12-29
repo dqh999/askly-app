@@ -31,20 +31,16 @@ export async function GET(request: Request) {
         return new Response(JSON.stringify({ error: 'Invalid page size' }), { status: 400 });
     }
 
+
     const filteredSentences = contents.filter((content) => {
-        if (topic && !content.topic.includes(topic)) {
+        if (topic && !content.topic.some(t => t.toLowerCase() === topic.toLowerCase())) {
             return false;
         }
-
-        if (validBandScore !== null && content.band !== validBandScore) {
+        if (validBandScore !== null && Math.abs(content.band - validBandScore) > 2) {
             return false;
         }
+        if (type && content.type.toLowerCase() !== type.toLowerCase()) {
 
-        if (bandScore && content.band !== Number(bandScore)) {
-            return false;
-        }
-
-        if (type && content.type !== type) {
             return false;
         }
 
