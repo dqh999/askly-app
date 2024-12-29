@@ -152,6 +152,8 @@ export const useTranslationPractice = () => {
 
   useEffect(() => {
     if (!isCheckAnswerLoading && isCheckAnswer) {
+      console.log("completion");
+      console.log(completion)
       const cleanData = completion.replace(/```json\s*|\s*```/g, '');
       const parsedData: ResponseData = JSON.parse(cleanData);
       console.log(parsedData);
