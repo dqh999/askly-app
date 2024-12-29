@@ -170,7 +170,7 @@ export const useTranslationPractice = () => {
   }, [isCheckAnswerLoading, isCheckAnswer, completion])
 
   const playContentToSpeech = () => {
-    const lang = !isEnglishToVietnamese ? 'vi-VN' : 'en-US';
+    // const lang = !isEnglishToVietnamese ? 'vi-VN' : 'en-US';
     const content = isEnglishToVietnamese ? currentContent.english : currentContent.vietnamese;
     speak(content, 'en-US' );
   }
