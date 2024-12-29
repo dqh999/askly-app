@@ -3,6 +3,8 @@ import { ieltsTopics, ieltsBands, contentTypes } from '../utils/ieltsData';
 import { useCompletion } from 'ai/react';
 import { Content, ContentType } from '../type/contentType';
 import { Issue, ResponseData } from '../type/resultType';
+import { useTextToSpeed } from './useTextToSpeed';
+import { useSpeechToText } from './useSpeechToText';
 
 const defaultContent: Content = {
   topic: ["Environment"],
@@ -18,6 +20,17 @@ export const useTranslationPractice = () => {
   const [selectedType, setSelectedType] = useState<ContentType>(contentTypes[0]);
 
   const [currentContent, setCurrentContent] = useState<Content>(defaultContent);
+
+  const { speak }: { speak: (text: string, lang?: string) => void } = useTextToSpeed();
+
+  const { 
+    setLanguage,
+    transcript,
+    listening: isSpeakingFinished,
+    resetTranscript,
+    startListening,
+    stopListening: stopSpeaking } = useSpeechToText();
+
   const [currentPage, setCurrentPage] = useState(1);
   const [isEnglishToVietnamese, setIsEnglishToVietnamese] = useState(true);
 
@@ -36,29 +49,15 @@ export const useTranslationPractice = () => {
     handleInputChange: handleUserAnswerChange,
     handleSubmit,
     isLoading: isCheckAnswerLoading,
-    error,
   } = useCompletion({
     api: "/api/checkAnswer",
     body: {
       context: isEnglishToVietnamese ? currentContent?.english : currentContent?.vietnamese,
     },
   });
-
-  const handleTopicChange = useCallback((topic: string) => {
-    setSelectedTopic(topic);
-    resetState();
-  }, []);
-
-  const handleBandChange = useCallback((band: number) => {
-    setSelectedBand(band);
-    resetState();
-  }, []);
-  const handleTypeChange = useCallback((type: ContentType) => {
-    setSelectedType(type);
-    resetState();
-  }, []);
   const resetState = () => {
     setUserAnswer('');
+    resetTranscript();
     setCurrentPage(1);
     setIsCheckAnswer(false);
     setShowAnswer(false);
@@ -66,6 +65,22 @@ export const useTranslationPractice = () => {
     setIssues([]);
     setIsCorrect(false);
   };
+
+  const handleTopicChange = useCallback((topic: string) => {
+    setSelectedTopic(topic);
+    resetState();
+  }, [resetState]);
+
+  const handleBandChange = useCallback((band: number) => {
+    setSelectedBand(band);
+    resetState();
+  }, [resetState]);
+  const handleTypeChange = useCallback((value: string) => {
+    const type = contentTypes.find((t) => t.description = value) as ContentType;
+    setSelectedType(type);
+    resetState();
+  }, [resetState]);
+
 
   const fetchContent = async (topic: string, bandScore: string, type: string, page: string) => {
     const url = new URL("/api/getContent", window.location.origin);
@@ -126,8 +141,19 @@ export const useTranslationPractice = () => {
       };
       setShowAnswer(true);
     }
-  }, [isCheckAnswerLoading])
+  }, [isCheckAnswerLoading, isCheckAnswer, completion])
 
+  const playContentToSpeech = () => {
+    const lang = isEnglishToVietnamese ? 'vi-VN' : 'en-US';
+    const content = isEnglishToVietnamese ? currentContent.english : currentContent.vietnamese;
+    speak(content, lang);
+  }
+  const convertSpeedToText = () => {
+    const lang = !isEnglishToVietnamese ? 'vi-VN' : 'en-US';
+    setLanguage(lang);
+    startListening();
+    setUserAnswer(transcript);
+  }
   return {
     selectedTopic,
     selectedBand,
@@ -147,6 +173,10 @@ export const useTranslationPractice = () => {
     toggleTranslationDirection,
     handleUserAnswerChange,
     handleCheckAnswer,
-    isCheckAnswerLoading
+    isCheckAnswerLoading,
+    playContentToSpeech,
+    convertSpeedToText,
+    isSpeakingFinished,
+    stopSpeaking
   };
 };

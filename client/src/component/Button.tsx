@@ -11,7 +11,7 @@ const Button: React.FC<ButtonProps> = ({ className = '', children, isLoading, on
     return (
         <button
             onClick={onClick}
-            className={`${className}`} 
+            className={` ${className}`} 
             {...props} 
         >
             {isLoading ? (

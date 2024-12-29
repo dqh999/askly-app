@@ -1,5 +1,5 @@
 import { Content } from "../type/contentType";
-import {Issue} from "../type/resultType";
+import { Issue } from "../type/resultType";
 type ResultFeedbackProps = {
     isCorrect: boolean;
     feedback: string;

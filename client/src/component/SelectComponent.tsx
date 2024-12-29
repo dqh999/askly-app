@@ -1,8 +1,8 @@
 type SelectComponentProps = {
     title: string,
-    input: any,
-    handleInputChange(e: any): void,
-    options: any[]
+    input: string,
+    handleInputChange(e: React.ChangeEvent<HTMLSelectElement>): void,
+    options: string[]
 };
 const SelectComponent = ({
     title,
@@ -11,7 +11,7 @@ const SelectComponent = ({
     options
 }: SelectComponentProps) => {
     return (
-        <div className="mb-6">
+        <div>
             <label htmlFor="topic" className="block text-sm font-medium text-gray-700 mb-2">
                 {title}
             </label>
@@ -21,7 +21,7 @@ const SelectComponent = ({
                 onChange={(e) => { handleInputChange(e) }}
                 className="w-full p-2 text-gray-700 border border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500"
             >
-                {options.map((option,index) => (
+                {options.map((option, index) => (
                     <option key={index} value={option}>
                         {option}
                     </option>

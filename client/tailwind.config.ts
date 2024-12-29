@@ -8,7 +8,8 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
+        background: "hsl(var(--scn-background))",
+        primary: "hsl(var(--scn-primary))",
         foreground: "var(--foreground)",
       },
     },

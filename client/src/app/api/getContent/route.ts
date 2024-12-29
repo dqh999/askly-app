@@ -5,8 +5,8 @@ export async function GET(request: Request) {
     const bandScore = url.searchParams.get('bandScore')
     const type = url.searchParams.get('type');
 
-    let page = Number(url.searchParams.get("page") || 1);
-    let pageSize = Number(url.searchParams.get("pageSize") || 1);
+    const page = Number(url.searchParams.get("page") || 1);
+    const pageSize = Number(url.searchParams.get("pageSize") || 1);
 
 
     if (!topic || !ieltsTopics.some(t => t.toLowerCase() === topic.toLowerCase())) {
