@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@component/*": ["./src/component/*"]
+      "@/component/*": ["./src/component/*"],
+      "@/component/ui/*": ["./src/component/ui/*"],
+      "@/type/*": ["./src/type/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/type/topicType.jsx"],
